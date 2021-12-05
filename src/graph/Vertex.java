@@ -16,16 +16,6 @@ public class Vertex implements Comparable<Vertex>{
     private Vertex parent;
     private Graph graph;
 
-    public boolean isChoosed() {
-        return choosed;
-    }
-
-    public void setChoosed(boolean choosed) {
-        this.choosed = choosed;
-    }
-
-    private boolean choosed = false;
-
     public String getName() {
         return name;
     }
@@ -49,6 +39,14 @@ public class Vertex implements Comparable<Vertex>{
         this.name =name;
         outConnections = new ArrayList<>();
         inConnections = new ArrayList<>();
+    }
+    public Connection getConnection(Vertex finalNode){
+        for(Connection con:getOutConnections()){
+            if(con.getTo() == finalNode){
+                return con;
+            }
+        }
+        return null;
     }
     protected void addToOutConnection(Connection connection){
         graph.connections.add(connection);
@@ -119,16 +117,14 @@ public class Vertex implements Comparable<Vertex>{
 
     @Override
     public String toString() {
-        String sF= (f==Float.MAX_VALUE)?"∞":f.toString();
-        String sG= (g==Float.MAX_VALUE)?"∞":g.toString();
-        String sH= (h==Float.MAX_VALUE)?"∞":h.toString();
-        return "Vertex{" +
-                "name="+name+
-                ", pos=" + position +
-                ", f=" + sF +
-                ", g=" + sG +
-                ", h=" + sH +
-                '}';
+       // String sF= (f==Float.MAX_VALUE)?"∞":f.toString();
+        //String sG= (g==Float.MAX_VALUE)?"∞":g.toString();
+        //String sH= (h==Float.MAX_VALUE)?"∞":h.toString();
+        return "" +
+                name+
+                position
+
+                ;
     }
 
     public void setGraph(Graph graph) {

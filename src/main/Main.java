@@ -1,16 +1,19 @@
 package main;
 
-import algorithm.Algorithm;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import graph.Connection;
 import graph.Graph;
 import graph.Vertex;
 import gui.Frame;
+import tools.FileRead;
 
 import javax.swing.*;
 
 public class Main {
     public static void main(String[]args) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        FlatLightLaf.setup();
+        UIManager.setLookAndFeel( new FlatLightLaf() );
         Vertex v = new Vertex("0,0",0,0);
         Vertex v1 = new Vertex("1,0",1,0);
         Vertex v2 = new Vertex("0,1",0,1);
@@ -33,8 +36,8 @@ public class Main {
         Connection con7 = new Connection(v2,v4,3f);
 
 
-
-        Frame f = new Frame(graph);
+        Graph graph1 =  FileRead.readGraph("files/graph1.txt");
+        Frame f = new Frame(graph1);
 
         f.setVisible(true);
 

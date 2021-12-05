@@ -10,6 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class GraphView extends JPanel {
 
@@ -19,8 +20,10 @@ public class GraphView extends JPanel {
     private float minHeightGraph = Float.MAX_VALUE;
     private Graph graph;
     private float radius;
-    private float margin = 0.2f;
+
     private ArrayList<Arrow>lines = new ArrayList<>();
+    private List<Vertex> path;
+
     public void setGraph(Graph graph){
         for(Vertex v:graph.getVertexes()){
             maxWidthGraph = v.getPosition().getX()>maxWidthGraph?v.getPosition().getX():maxWidthGraph;
@@ -29,12 +32,12 @@ public class GraphView extends JPanel {
             minHeightGraph = v.getPosition().getY()<minHeightGraph?v.getPosition().getY():minHeightGraph;
 
         }
-        System.out.println(maxWidthGraph+" "+maxHeightGraph+" "+minWidthGraph+" "+minHeightGraph);
+
         for(Vertex v:graph.getVertexes()){
-            float x =margin+((v.getPosition().getX()-minWidthGraph)/(maxWidthGraph-minWidthGraph))*(1-2*margin);
-            float y =margin+ (v.getPosition().getY()-minHeightGraph)/(maxHeightGraph-minHeightGraph)*(1-2*margin);
+            float x =GUIConstants.MARGIN+((v.getPosition().getX()-minWidthGraph)/(maxWidthGraph-minWidthGraph))*(1-2*GUIConstants.MARGIN);
+            float y =GUIConstants.MARGIN+ (v.getPosition().getY()-minHeightGraph)/(maxHeightGraph-minHeightGraph)*(1-2*GUIConstants.MARGIN);
             v.setPosition(new Vector2(x,y));
-            System.out.println(v.getPosition().getX()+" "+v.getPosition().getY());
+
         }
         this.graph = graph;
     }
@@ -44,13 +47,13 @@ public class GraphView extends JPanel {
             public void componentResized(ComponentEvent e) {
                 System.out.println(getWidth());
                 lines = new ArrayList<>();
-                radius= 1/20f*(getWidth()>getHeight()?getHeight():getWidth());
+                radius= GUIConstants.SIZE_VERTEX*getMinDimension();
 
                 for(Vertex v:graph.getVertexes()) {
                     for (Connection con : v.getOutConnections()) {
                         Vector2 init = new Vector2(con.getFrom().getPosition().getX()*getWidth(),con.getFrom().getPosition().getY()*getHeight());
                         Vector2 end = Intersection.lineWithCircle(init,radius,new Vector2(con.getTo().getPosition().getX()*getWidth(),con.getTo().getPosition().getY()*getHeight()));
-                        lines.add(new Arrow(con,init,end,0.01f*getWidth(),0.01f*getHeight()));
+                        lines.add(new Arrow(con,init,end,GUIConstants.ANCHOR_ARROW*getWidth(),GUIConstants.HEIGHT_ARROW *getHeight()));
                     }
                 }
 
@@ -60,32 +63,63 @@ public class GraphView extends JPanel {
     }
     @Override
     public void paint(Graphics g) {
+        super.paint(g);
+        Font font =new Font("Sherif",Font.BOLD,(int)(GUIConstants.SIZE_FONT*getMinDimension()));
+
         Graphics2D g2 = (Graphics2D)g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
-        super.paint(g);
+
+
+
+        g2.setFont(font);
+
         if(graph!=null){
+
             for(Arrow arrow:lines){
                 if(arrow.getCon().isUsed()){
-                    g2.setColor(Color.red);
+                    g2.setColor(new Color(0,171,205));
+                    g2.setStroke(new BasicStroke(GUIConstants.SIZE_PATH_STROKE*getWidth(),BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,5f));
                 }else{
                     g2.setColor(Color.darkGray);
+                    g2.setStroke(new BasicStroke(GUIConstants.SIZE_STROKE*getWidth(),BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,5f));
                 }
-                g2.setStroke(new BasicStroke(0.001f*getWidth(),BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,0.2f));
+
                 arrow.drawArrowLine(g);
                 //DRAW STRINGS
-                g2.setFont(new Font("Notosans",Font.BOLD,20));
 
-                Vector2 middle =arrow.getStart().middlePoint(arrow.getEnd());
-                float rotation =arrow.getEnd().sub(arrow.getStart()).angle();
+                float posX = arrow.getCon().getTo().getPosition().getX()*getWidth();
+                float posY = arrow.getCon().getTo().getPosition().getY()*getHeight();
 
-                g2.rotate(rotation,middle.getX(),middle.getY()-10);
-                g2.drawString(Float.toString(arrow.getCon().getValue()),middle.getX(),middle.getY()-10);
-                g2.rotate(-rotation,middle.getX(),middle.getY()-10);
+                Vector2 middle =arrow.getStart().middlePoint(new Vector2(posX,posY));
+
+                Vector2 v = arrow.getEnd().sub(arrow.getStart());
+                float rotation =v.angle();
+                if(rotation>=-Math.PI-0.01f&&rotation<=-Math.PI/2f+0.01f){
+                    rotation = (float)(rotation+Math.PI);
+
+                }
+                if(rotation>=Math.PI/2f-0.01f&&rotation<=Math.PI+0.01f){
+                    rotation = (float)(rotation+Math.PI);
+
+                }
+
+                Vector2 posString = middle.add(new Vector2(v.getY(),-v.getX()).normalize().mult(GUIConstants.STRINGS_CONNECTION_DISPLACEMENT));
+
+
+                g2.rotate(rotation,posString.getX(),posString.getY());
+
+                drawCenteredString(Float.toString(arrow.getCon().getValue()),(int)posString.getX(),(int)posString.getY(),g);
+
+
+                g2.rotate(-rotation,posString.getX(),posString.getY());
+               // g2.setColor(Color.green);
+               // g2.fillRect((int)posString.getX(),(int)posString.getY(),2,2);
+
             }
             for(Vertex v:graph.getVertexes()){
-                if(v.isChoosed()){
-                    g2.setColor(Color.red);
+                if(path!=null&&path.contains(v)){
+                    g2.setColor(new Color(0,107,181));
                 }else{
                     g2.setColor(Color.darkGray);
                 }
@@ -95,7 +129,11 @@ public class GraphView extends JPanel {
 
 
                 g2.fillOval((int)(posX-radius),(int)(posY-radius),(int)radius*2,(int)radius*2);
+                g2.setColor(Color.white);
 
+                String name= v.getName();
+
+                drawCenteredString(name,(int)(posX),(int)(posY),g);
 
 
             }
@@ -106,7 +144,19 @@ public class GraphView extends JPanel {
 
         repaint();
     }
+    public void drawCenteredString(String s, int w, int h, Graphics g) {
+        FontMetrics fm = g.getFontMetrics();
+        int x = w - fm.stringWidth(s) / 2;
+        int y = (fm.getAscent() + h -((fm.getAscent() + fm.getDescent())) / 2);
+        g.drawString(s, x, y);
+    }
 
+    public int getMinDimension(){
+        return getWidth()>getHeight()?getHeight():getWidth();
+    }
 
-
+    public void setPath(List<Vertex> path) {
+        this.path = path;
+    }
 }
+

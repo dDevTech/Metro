@@ -10,23 +10,31 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 
 public class Algorithm {
-    public static void A(Vertex start, Vertex end){
-        System.out.println("Start: "+start);
-        System.out.println("End: "+end);
-        Queue<Vertex> open = new PriorityQueue<>();
-        start.setH(start.distance(end));
-        start.setG(0);
+    public static List<Vertex> findPath(Vertex start, Vertex end){
+        for(Vertex v:start.getGraph().getVertexes()){
+            v.setParent(null);
+            v.setG(Float.MAX_VALUE);
+            v.setH(v.distance(end));
+            v.updateF();
+        }
+        for(Connection con:start.getGraph().getConnections()){
+            con.setUsed(false);
+        }
 
-        start.updateF();
-        open.add(start);
+        Queue<Vertex> open = new PriorityQueue<>();
         List<Vertex> closed = new ArrayList<>();
 
+        start.setG(0);
+        start.updateF();
 
+        open.add(start);
+
+        Vertex current=null;
         while(!open.isEmpty()){
-            System.out.println("Closed: "+closed);
-            System.out.println("Open: "+open);
-            Vertex current = open.poll();
-            System.out.println("Current: "+current);
+            System.out.println(open);
+            System.out.println(closed);
+
+            current = open.poll();
             closed.add(current);
             if(current == end){
                 break;
@@ -36,37 +44,35 @@ public class Algorithm {
                 Vertex neighbor =con.getTo();
                 if(closed.contains(neighbor))continue;
 
-                float progress= current.getG()+con.getValue();
-                if(neighbor.getG()>progress){
+                float progress= current.getG()+con.getValue()+ current.getH();
+                if(neighbor.getF()>progress){
                     neighbor.setH(neighbor.distance(end));
                     neighbor.setG(current.getG()+con.getValue());
                     neighbor.updateF();
                     neighbor.setParent(current);
                     if(!open.contains(neighbor)) open.add(neighbor);
                 }
-
-
-
             }
-
 
         }
-        System.out.println(closed);
-
-
+        System.out.println(open);
+        if(open.isEmpty()&&current != end){
+            return null;
+        }
+        return getPath(start,end);
     }
-    public static void updatePath(Vertex start,Vertex end){
+    private static List<Vertex> getPath(Vertex start, Vertex end){
+        List<Vertex>vertexes = new ArrayList<>();
         Vertex current=end;
-        end.setChoosed(true);
+        vertexes.add(end);
         while(current!=start){
-            for(Connection con:current.getInConnections()){
-                if(con.getFrom()==current.getParent()){
-                    con.setUsed(true);
-                }
-            }
+            Connection con = current.getParent().getConnection(current);
+            con.setUsed(true);
             current = current.getParent();
 
-            current.setChoosed(true);
+            vertexes.add(current);
         }
+        return vertexes;
     }
+
 }
