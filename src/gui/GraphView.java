@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class GraphView extends JPanel {
 
@@ -45,7 +46,7 @@ public class GraphView extends JPanel {
         this.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                System.out.println(getWidth());
+
                 lines = new ArrayList<>();
                 radius= GUIConstants.SIZE_VERTEX*getMinDimension();
 
@@ -64,8 +65,8 @@ public class GraphView extends JPanel {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        Font font =new Font("Sherif",Font.BOLD,(int)(GUIConstants.SIZE_FONT*getMinDimension()));
-
+        Font font =new Font("Noto Sans",Font.PLAIN,5);
+        font = font.deriveFont(GUIConstants.SIZE_FONT*getMinDimension());
         Graphics2D g2 = (Graphics2D)g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
@@ -131,9 +132,9 @@ public class GraphView extends JPanel {
                 g2.fillOval((int)(posX-radius),(int)(posY-radius),(int)radius*2,(int)radius*2);
                 g2.setColor(Color.white);
 
-                String name= v.getName();
+                String name= v.getId();
 
-                drawCenteredString(name,(int)(posX),(int)(posY),g);
+                drawCenteredString(name.toUpperCase(),(int)(posX),(int)(posY),g);
 
 
             }
@@ -146,6 +147,7 @@ public class GraphView extends JPanel {
     }
     public void drawCenteredString(String s, int w, int h, Graphics g) {
         FontMetrics fm = g.getFontMetrics();
+
         int x = w - fm.stringWidth(s) / 2;
         int y = (fm.getAscent() + h -((fm.getAscent() + fm.getDescent())) / 2);
         g.drawString(s, x, y);

@@ -3,7 +3,6 @@ package graph;
 import tools.Vector2;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Vertex implements Comparable<Vertex>{
@@ -15,7 +14,8 @@ public class Vertex implements Comparable<Vertex>{
     private Float h=Float.MAX_VALUE ;
     private Vertex parent;
     private Graph graph;
-
+    private String id="";
+    private String name="";
     public String getName() {
         return name;
     }
@@ -24,7 +24,16 @@ public class Vertex implements Comparable<Vertex>{
         this.name = name;
     }
 
-    private String name;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+
     public Vertex(){
         outConnections = new ArrayList<>();
         inConnections = new ArrayList<>();
@@ -36,7 +45,7 @@ public class Vertex implements Comparable<Vertex>{
     }
     public Vertex(String name,float x,float y){
         this.position = new Vector2(x,y);
-        this.name =name;
+        this.id =name;
         outConnections = new ArrayList<>();
         inConnections = new ArrayList<>();
     }
@@ -121,6 +130,8 @@ public class Vertex implements Comparable<Vertex>{
         //String sG= (g==Float.MAX_VALUE)?"∞":g.toString();
         //String sH= (h==Float.MAX_VALUE)?"∞":h.toString();
         return "" +
+                id +
+                ":"+
                 name+
                 position
 
