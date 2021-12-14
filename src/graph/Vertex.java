@@ -131,10 +131,8 @@ public class Vertex implements Comparable<Vertex>{
         //String sH= (h==Float.MAX_VALUE)?"∞":h.toString();
         return "" +
                 id +
-                ":"+
-                name+
-                position
-
+                ": "+
+                name
                 ;
     }
 

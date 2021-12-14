@@ -1,5 +1,7 @@
 package graph;
 
+import tools.Vector2;
+
 public class Connection{
     private float value;
     private Vertex from;
@@ -24,10 +26,11 @@ public class Connection{
 
     private boolean transfer = false;
     public Connection(Vertex from,Vertex to,float value){
-        this.value = value;
+        this.value = from.getPosition().distance(to.getPosition())+value;
         this.from = from;
         this.to = to;
         updateConnection(this);
+
     }
     private void updateConnection(Connection connection){
         to.addToInConnection(connection);

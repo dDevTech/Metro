@@ -25,20 +25,26 @@ public class FileRead {
     public static Graph readGraph(String path){
         Scanner sc = readFile(path);
         Pattern p = Pattern.compile("(;|\n|,)");
-        String[]nodes = sc.nextLine().replace(" ","").split(";");
+
 
         sc.useDelimiter(p);
 
         Graph graph = new Graph();
         HashMap<String,Vertex>vertexes = new HashMap<>();
-        for(int i =0;i<nodes.length;i++){
-            int index =nodes[i].indexOf("=");
-            String positionString= nodes[i].substring(index+1);
-            String name = nodes[i].substring(0,index);
+        while(sc.hasNext()){
+            String text = sc.nextLine();
+            System.out.println(text);
+            if(text.contains("#"))break;
+            String nodeContent = text.replace(" ","");
+            int index =nodeContent.indexOf("=");
+            String positionString= nodeContent.substring(index+1);
+
+            String []name_id = nodeContent.substring(0,index).split(";");
             String[]positions= positionString.split(",");
 
-            Vertex v = new Vertex(name,Float.parseFloat(positions[0]),Float.parseFloat(positions[1]));
-            vertexes.put(name,v);
+            Vertex v = new Vertex(name_id[0],Float.parseFloat(positions[1]),Float.parseFloat(positions[0]));
+            v.setName(name_id[1]);
+            vertexes.put(name_id[0],v);
 
             graph.addVertex(v);
         }
@@ -50,8 +56,15 @@ public class FileRead {
 
             String[]conString =next.split("-");
             String[]conString2=conString[1].split("=");
-            if(!vertexes.containsKey(conString[0])||!vertexes.containsKey(conString2[0]))throw new IllegalArgumentException("Connection vertexes must be declared");
-            new Connection(vertexes.get(conString[0]),vertexes.get(conString2[0]),Float.parseFloat(conString2[1]));
+            String from = conString[0];
+            boolean bidir = false;
+            if(conString[0].charAt(0)=='*'){from = conString[0].substring(1);bidir= true;}
+            System.out.println(conString2[0]);
+            if(!vertexes.containsKey(from)||!vertexes.containsKey(conString2[0]))throw new IllegalArgumentException("Connection vertexes must be declared");
+            new Connection(vertexes.get(from),vertexes.get(conString2[0]),Float.parseFloat(conString2[1]));
+            if(bidir){
+                new Connection(vertexes.get(conString2[0]),vertexes.get(from),Float.parseFloat(conString2[1]));
+            }
 
         }
         return graph;

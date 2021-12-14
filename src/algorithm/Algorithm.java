@@ -4,10 +4,7 @@ import graph.Connection;
 import graph.Graph;
 import graph.Vertex;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.*;
 
 public class Algorithm {
     public static List<Vertex> findPath(Vertex start, Vertex end){
@@ -72,6 +69,7 @@ public class Algorithm {
 
             vertexes.add(current);
         }
+        Collections.reverse(vertexes);
         return vertexes;
     }
 
